@@ -1,0 +1,59 @@
+version: "3.7"
+
+services:
+    redis:
+        image: redis:latest
+        container_name: devtool_redis
+        restart: always
+        ports:
+          - ${REDIS_PORT}:${REDIS_PORT}
+    # minio:
+    #     image: minio/minio:RELEASE.2021-01-08T21-18-21Z
+    #     container_name: devtool_minio
+    #     command: server /data
+    #     restart: always
+    #     environment:
+    #         MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+    #         MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    #     ports:
+    #       - ${MINIO_PORT}:${MINIO_PORT}
+    mysql:
+        image: mysql
+        container_name: devtool_mysql
+        restart: always
+        # cap_add:
+        #     - SYS_NICE
+        volumes:
+            - ./data/mysql:/var/lib/mysql
+        command: --default-authentication-plugin=mysql_native_password
+        # security_opt:
+        #     - seccomp:unconfined
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        ports:
+            - ${MYSQL_PORT}:${MYSQL_PORT}
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin:latest
+        container_name: devtool_phpmyadmin
+        restart: always
+        ports:
+            - ${PMA_PORT}:80
+        environment:
+            PMA_HOST: ${PMA_DB_ENGINE}
+            UPLOAD_LIMIT: 1000M
+    mongo:
+        image: mongo
+        restart: always
+        ports:
+            - 27017:27017
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: example
+        volumes:
+            - ./data/mongo:/data/db
+    rabbitmq:
+        image: rabbitmq:management-alpine
+        tty: true
+        ports:
+            - "15672:15672"
+            - "5672:5672"
